@@ -1,7 +1,11 @@
-import { Link, useLoaderData } from 'react-router-dom';
+import { Link, useLoaderData, useRouteLoaderData } from 'react-router-dom';
 import IdCard from '../components/IdCard';
 
 const Home = () => {
+  const name = useRouteLoaderData("global");
+
+  alert(`hello ${name}`);
+
   const people = useLoaderData();
 
   return (
