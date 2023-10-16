@@ -1,33 +1,26 @@
-import * as React from "react";
-import { createRoot } from "react-dom/client";
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Route,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import axios from "axios";
 import Home from "./pages/Home";
 import PersonalPage from "./pages/PersonalPage";
 
-import './App.css';
+import "./App.css";
 
 const cache = {};
 
 const router = createBrowserRouter([
   {
     path: "/",
-    loader: async (req) => {
-      if (!cache[req.request.url]) {
-        const urlArray = req.request.url.split('?')
-        const query = urlArray[1] ? urlArray[1] : null;
+    loader: async ({ request }) => {
+      if (!cache[request.url]) {
+        const query = new URL(request.url).search;
+
         // loaders can be async functions
-        const people = await axios.get(`http://localhost:3000/people?${query}`).then(res => res.data);
-        cache[req.request.url] = people;
+        const people = await axios.get(`http://localhost:3000/people${query}`).then(res => res.data);
+
+        cache[request.url] = people;
       }
-      return cache[req.request.url];
-    },
-    shouldRevalidate: (crtUrl) => {
-      return crtUrl.currentUrl !== crtUrl.nextUrl
+
+      return cache[request.url];
     },
     element: (
       <Home />
@@ -35,13 +28,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/people/:id",
-    loader: async (req) => {
-      if (!cache[req.request.url]) {
+    loader: async ({ request, params }) => {
+      if (!cache[request.url]) {
         // loaders can be async functions
-        const people = await axios.get(`http://localhost:3000/people/${req.params.id}`).then(res => res.data);
-        cache[req.request.url] = people;
+        const people = await axios.get(`http://localhost:3000/people/${params.id}`).then(res => res.data);
+
+        cache[request.url] = people;
       }
-      return cache[req.request.url];
+
+      return cache[request.url];
     },
     element: <PersonalPage />,
   },
@@ -52,7 +47,7 @@ function App() {
     <>
       <RouterProvider router={router} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
