@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLoaderData, Link } from 'react-router-dom';
+import axios from 'axios';
 
 const PersonalPage = () => {
   const pers = useLoaderData()
@@ -12,4 +13,13 @@ const PersonalPage = () => {
   )
 }
 
-export default PersonalPage
+export default     {
+  path: "people/:id",
+  loader: async ({ request, params }) => {
+    // loaders can be async functions
+    const people = await axios.get(`http://localhost:3000/people/${params.id}`).then(res => res.data);
+
+    return people;
+  },
+  element: <PersonalPage />,
+};
